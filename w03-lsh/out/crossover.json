@@ -1,0 +1,82 @@
+{
+  "runs": [
+    {
+      "n": 125,
+      "threshold": 0.6,
+      "brute_s": 0.04798250000021653,
+      "brute_calls": 7750,
+      "brute_peak_bytes": 7912,
+      "lsh_s": 2.363843199999792,
+      "lsh_calls": 8,
+      "lsh_peak_bytes": 1041972
+    },
+    {
+      "n": 250,
+      "threshold": 0.6,
+      "brute_s": 0.19336629999997967,
+      "brute_calls": 31125,
+      "brute_peak_bytes": 7912,
+      "lsh_s": 3.0850996999997733,
+      "lsh_calls": 15,
+      "lsh_peak_bytes": 1500864
+    },
+    {
+      "n": 500,
+      "threshold": 0.6,
+      "brute_s": 0.8073401999999987,
+      "brute_calls": 124750,
+      "brute_peak_bytes": 10376,
+      "lsh_s": 3.4354161000001113,
+      "lsh_calls": 29,
+      "lsh_peak_bytes": 2219196
+    },
+    {
+      "n": 1000,
+      "threshold": 0.6,
+      "brute_s": 3.3207132999996247,
+      "brute_calls": 499500,
+      "brute_peak_bytes": 12232,
+      "lsh_s": 3.8243962999995347,
+      "lsh_calls": 58,
+      "lsh_peak_bytes": 3401880
+    },
+    {
+      "n": 2000,
+      "threshold": 0.6,
+      "brute_s": 14.024108700000397,
+      "brute_calls": 1999000,
+      "brute_peak_bytes": 21704,
+      "lsh_s": 4.408541800000421,
+      "lsh_calls": 116,
+      "lsh_peak_bytes": 5483924
+    },
+    {
+      "n": 4000,
+      "threshold": 0.6,
+      "brute_s": 53.791825600000266,
+      "brute_calls": 7998000,
+      "brute_peak_bytes": 29192,
+      "lsh_s": 6.327930100000231,
+      "lsh_calls": 241,
+      "lsh_peak_bytes": 9349904
+    },
+    {
+      "n": 8000,
+      "threshold": 0.6,
+      "brute_s": 243.7258925999995,
+      "brute_calls": 31996000,
+      "brute_peak_bytes": 68200,
+      "lsh_s": 9.260150800000702,
+      "lsh_calls": 474,
+      "lsh_peak_bytes": 16839060
+    }
+  ],
+  "machine": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel(R) Core(TM) i9-14900HX",
+    "python": "3.12.14",
+    "ram_bytes": 34070192128,
+    "background": "Codex/ChatGPT, Douyin, Explorer, ACE-Tray and audio services were running; normal background load, not an idle benchmark."
+  },
+  "memory_method": "tracemalloc peak during find; excludes prebuilt input and total process RAM"
+}
