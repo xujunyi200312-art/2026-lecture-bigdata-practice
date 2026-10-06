@@ -18,6 +18,11 @@ comparisons is easy; skipping comparisons without losing the pairs is the task.
 """
 
 
+import random
+
+from task1_minhash import lsh_candidates
+
+
 class BruteForce:
     """Correct, and quadratic."""
 
@@ -60,8 +65,35 @@ class YourFinder:
     You may reuse your Task 1 code.
     """
 
-    def __init__(self, threshold):
-        raise NotImplementedError("write your finder")
+    def __init__(self, threshold, hashes=120, bands=30):
+        if hashes <= 0 or bands <= 0 or hashes % bands:
+            raise ValueError("hash count must be positive and divisible by bands")
+        self.threshold = threshold
+        self.hashes = hashes
+        self.bands = bands
 
     def find(self, docs, similarity):
-        raise NotImplementedError
+        if self.threshold <= 0:
+            return BruteForce(self.threshold).find(docs, similarity)
+        # Invert the sparse matrix so each occupied row is hashed only once.
+        postings = {}
+        for i, doc in enumerate(docs):
+            for shingle in doc:
+                postings.setdefault(shingle, []).append(i)
+        prime = 2**61 - 1
+        rng = random.Random(246)
+        coefficients = [(rng.randrange(1, prime), rng.randrange(prime))
+                        for _ in range(self.hashes)]
+        signatures = [[prime] * self.hashes for _ in docs]
+        for shingle, columns in postings.items():
+            values = [(a * shingle + b) % prime for a, b in coefficients]
+            for column in columns:
+                sig = signatures[column]
+                for k, value in enumerate(values):
+                    if value < sig[k]:
+                        sig[k] = value
+        # Empty documents have Jaccard 0 and cannot match a positive threshold.
+        ids = [i for i, doc in enumerate(docs) if doc]
+        candidates = lsh_candidates([signatures[i] for i in ids], self.bands)
+        return {(ids[i], ids[j]) for i, j in candidates
+                if similarity(docs[ids[i]], docs[ids[j]]) >= self.threshold}
