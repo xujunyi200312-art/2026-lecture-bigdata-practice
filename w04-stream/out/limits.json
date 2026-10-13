@@ -1,0 +1,59 @@
+{
+  "runs": [
+    {
+      "n": 25000,
+      "true_distinct": 9189,
+      "exact_s": 0.07189870000001974,
+      "exact_peak_bytes": 977106,
+      "fm_estimate": 8820.074318769448,
+      "fm_s": 3.955469600000015,
+      "fm_peak_bytes": 11549,
+      "fm_ratio": 0.9598513786885894
+    },
+    {
+      "n": 100000,
+      "true_distinct": 36702,
+      "exact_s": 0.2807492000000593,
+      "exact_peak_bytes": 3925612,
+      "fm_estimate": 35280.29727507779,
+      "fm_s": 15.911847200000011,
+      "fm_peak_bytes": 11546,
+      "fm_ratio": 0.9612636171074544
+    },
+    {
+      "n": 400000,
+      "true_distinct": 146970,
+      "exact_s": 1.1504106999999522,
+      "exact_peak_bytes": 11591308,
+      "fm_estimate": 130380.79014426807,
+      "fm_s": 64.20929510000008,
+      "fm_peak_bytes": 11555,
+      "fm_ratio": 0.8871251965997692
+    },
+    {
+      "n": 1600000,
+      "true_distinct": 587625,
+      "exact_s": 4.6505207000000155,
+      "exact_peak_bytes": 46647606,
+      "fm_estimate": 548174.2443904214,
+      "fm_s": 255.32939150000004,
+      "fm_peak_bytes": 11563,
+      "fm_ratio": 0.9328640619279667
+    },
+    {
+      "n": 25000000,
+      "true_distinct": 9179304,
+      "exact_s": 76.57108870000002,
+      "exact_peak_bytes": 744742672
+    }
+  ],
+  "machine": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel(R) Core(TM) i9-14900HX",
+    "python": "3.12.14",
+    "ram_bytes": 34075435008,
+    "available_ram_bytes": 25810714624,
+    "other_running": "Chrome, Codex/ChatGPT, and Windows background services"
+  },
+  "measurement_notes": "Python tracemalloc peaks include generated strings and algorithm state; not total process RSS. FM uses 64 hashes. The additional 25M stress run measures only the exact set."
+}

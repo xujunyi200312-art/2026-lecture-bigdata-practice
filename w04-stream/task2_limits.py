@@ -21,9 +21,25 @@ OUT = os.path.join(HERE, "out")
 
 
 def machine():
-    return {"platform": platform.platform(),
+    info = {"platform": platform.platform(),
             "processor": platform.processor() or platform.machine(),
             "python": platform.python_version()}
+    if os.name == 'nt':
+        import ctypes
+        import winreg
+        class MemoryStatus(ctypes.Structure):
+            _fields_ = [('length', ctypes.c_ulong), ('load', ctypes.c_ulong)] + [
+                (name, ctypes.c_ulonglong) for name in
+                ('total', 'available', 'page_total', 'page_available',
+                 'virtual_total', 'virtual_available', 'extended')]
+        status = MemoryStatus()
+        status.length = ctypes.sizeof(status)
+        if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+            info.update(ram_bytes=status.total, available_ram_bytes=status.available)
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                            r'HARDWARE\DESCRIPTION\System\CentralProcessor\0') as key:
+            info['processor'] = winreg.QueryValueEx(key, 'ProcessorNameString')[0].strip()
+    return info
 
 
 def stream(n, distinct_ratio=0.4, seed=246):
@@ -51,6 +67,8 @@ def exact_distinct(n):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--sizes", default="100000,400000,1600000")
+    p.add_argument("--exact-only", action="store_true",
+                   help="additional exact-set stress test; does not measure FM")
     a = p.parse_args()
     os.makedirs(OUT, exist_ok=True)
 
@@ -65,7 +83,7 @@ def main():
         row = {"n": n, "true_distinct": true, "exact_s": t_exact,
                "exact_peak_bytes": m_exact}
 
-        if flajolet_martin is not None:
+        if flajolet_martin is not None and not a.exact_only:
             try:
                 tracemalloc.start()
                 t0 = time.perf_counter()

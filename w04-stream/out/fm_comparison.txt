@@ -1,0 +1,5 @@
+True distinct count: 19953; 64 hashes, seed 246, groups of 8
+arithmetic mean of 2^R: 64256.00 (3.2204x)
+median of 2^R: 16384.00 (0.8211x)
+median of group arithmetic means: 70400.00 (3.5283x)
+chosen: median of corrected group geometric means: 24946.94 (1.2503x)

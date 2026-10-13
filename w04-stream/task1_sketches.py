@@ -14,6 +14,10 @@ approximating.
     python3 task1_sketches.py --verify
 """
 import argparse, random
+import hashlib
+import math
+import statistics
+import struct
 
 
 class BloomFilter:
@@ -28,13 +32,24 @@ class BloomFilter:
     """
 
     def __init__(self, m, k, seed=246):
-        raise NotImplementedError("write the Bloom filter")
+        if m <= 0 or k <= 0:
+            raise ValueError("m and k must be positive")
+        self.m, self.k, self.seed = m, k, seed
+        self.bits = bytearray((m + 7) // 8)
+
+    def _indices(self, item):
+        data = (str(self.seed) + ':' + str(item)).encode()
+        for h in struct.unpack('<' + 'Q' * self.k,
+                               hashlib.shake_256(data).digest(8 * self.k)):
+            yield h % self.m
 
     def add(self, item):
-        raise NotImplementedError
+        for i in self._indices(item):
+            self.bits[i // 8] |= 1 << (i % 8)
 
     def __contains__(self, item):
-        raise NotImplementedError
+        return all(self.bits[i // 8] & (1 << (i % 8))
+                   for i in self._indices(item))
 
     def expected_fp_rate(self, n_inserted):
         """The textbook's predicted false-positive rate after n insertions.
@@ -42,7 +57,9 @@ class BloomFilter:
         §4.4.2 derives it. Return the number, do not measure it - the harness
         measures separately and compares the two.
         """
-        raise NotImplementedError
+        if n_inserted < 0:
+            raise ValueError("n_inserted must be nonnegative")
+        return (-math.expm1(-self.k * n_inserted / self.m)) ** self.k
 
 
 def flajolet_martin(stream, n_hashes=64, seed=246):
@@ -67,7 +84,32 @@ def flajolet_martin(stream, n_hashes=64, seed=246):
 
     Return your estimate as a float.
     """
-    raise NotImplementedError("write Flajolet-Martin")
+    maxima = fm_maxima(stream, n_hashes, seed)
+    if maxima is None:
+        return 0.0
+    # Average in log space to avoid exponential outliers, then take the
+    # median across groups. The 1.259 correction removes the asymptotic
+    # geometric-mean bias of maximum trailing-zero registers.
+    groups = [maxima[i:i + 8] for i in range(0, n_hashes, 8)]
+    return statistics.median(2.0 ** statistics.mean(g) for g in groups) / 1.259
+
+
+def fm_maxima(stream, n_hashes=64, seed=246):
+    """Fixed-size registers; SHAKE supplies domain-seeded 32-bit hashes."""
+    if n_hashes <= 0:
+        raise ValueError("n_hashes must be positive")
+    maxima = [0] * n_hashes
+    unpack = struct.Struct('<' + 'I' * n_hashes).unpack
+    prefix = (str(seed) + ':').encode()
+    nonempty = False
+    for item in stream:
+        nonempty = True
+        hashes = unpack(hashlib.shake_256(prefix + str(item).encode()).digest(4 * n_hashes))
+        for i, h in enumerate(hashes):
+            r = (h & -h).bit_length() - 1 if h else 32
+            if r > maxima[i]:
+                maxima[i] = r
+    return maxima if nonempty else None
 
 
 def reservoir_sample(stream, k, seed=246):
@@ -78,7 +120,20 @@ def reservoir_sample(stream, k, seed=246):
 
     Return a list of k items (or fewer if the stream was shorter).
     """
-    raise NotImplementedError("write reservoir sampling")
+    if k < 0:
+        raise ValueError("k must be nonnegative")
+    if k == 0:
+        return []
+    rng = random.Random(seed)
+    sample = []
+    for n, item in enumerate(stream, 1):
+        if n <= k:
+            sample.append(item)
+        else:
+            j = rng.randrange(n)
+            if j < k:
+                sample[j] = item
+    return sample
 
 
 # ------------------------------------------------------------------- harness

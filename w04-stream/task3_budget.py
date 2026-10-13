@@ -18,6 +18,8 @@ better score by occasionally forgetting something it was given has not improved
 anything, it has broken the contract.
 """
 import hashlib
+import struct
+import sys
 
 
 class NaiveFilter:
@@ -64,14 +66,30 @@ class YourFilter:
     observation.md asks.
     """
 
+    __slots__ = ('bits',)
+
     def __init__(self, n_bits, seed=246):
-        raise NotImplementedError("write your filter")
+        # Count Python instance and bytearray overhead, plus an 8-byte seed.
+        size = n_bits // 8 - sys.getsizeof(self) - sys.getsizeof(bytearray(1)) + 1
+        if size <= 8:
+            raise ValueError("budget too small for filter metadata")
+        self.bits = bytearray(size)
+        self.bits[:8] = (seed % (1 << 64)).to_bytes(8, 'little')
+
+    def _indices(self, item):
+        m = (len(self.bits) - 8) * 8
+        digest = hashlib.shake_256(bytes(self.bits[:8]) + str(item).encode()).digest(56)
+        for h in struct.unpack('<7Q', digest):
+            yield h % m
 
     def add(self, item):
-        raise NotImplementedError
+        for i in self._indices(item):
+            self.bits[8 + i // 8] |= 1 << (i % 8)
 
     def __contains__(self, item):
-        raise NotImplementedError
+        return all(self.bits[8 + i // 8] & (1 << (i % 8))
+                   for i in self._indices(item))
 
     def memory_bits(self):
-        raise NotImplementedError
+        # All persistent per-filter storage, not just the bitmap payload.
+        return 8 * (sys.getsizeof(self) + sys.getsizeof(self.bits))
