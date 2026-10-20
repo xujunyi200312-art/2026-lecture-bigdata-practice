@@ -86,10 +86,38 @@ class YourPageRank:
     """
 
     def __init__(self, beta=0.85, tol=1e-10, max_iter=100):
-        raise NotImplementedError("write your PageRank")
+        self.beta, self.tol, self.max_iter = beta, tol, max_iter
+        self.iterations = 0
+        self._peak_floats = 0
 
     def run(self, graph):
-        raise NotImplementedError
+        n = len(graph)
+        self.iterations = 0
+        self._peak_floats = 0
+        if not n:
+            return {}
+        ranks = dict.fromkeys(graph, 1.0 / n)
+        # Reuse the input adjacency lists: no matrix or per-edge float weights.
+        # Two n-element rank vectors plus a conservative 16 scalar/temporary
+        # float slots (parameters, sums, divisions and delta intermediates).
+        self._peak_floats = 2 * n + 16
+        for step in range(1, self.max_iter + 1):
+            dangling = sum(ranks[v] for v, outs in graph.items() if not outs)
+            base = (1.0 - self.beta + self.beta * dangling) / n
+            updated = dict.fromkeys(graph, base)
+            for v, outs in graph.items():
+                if outs:
+                    share = self.beta * ranks[v] / len(outs)
+                    for w in outs:
+                        updated[w] += share
+            delta = sum(abs(updated[v] - ranks[v]) for v in graph)
+            ranks = updated
+            # Drop the alias before the next iteration allocates a new vector.
+            del updated
+            self.iterations = step
+            if delta < self.tol:
+                break
+        return ranks
 
     def memory_floats(self):
-        raise NotImplementedError
+        return self._peak_floats

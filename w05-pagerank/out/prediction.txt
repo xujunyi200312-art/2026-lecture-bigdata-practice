@@ -1,0 +1,1 @@
+Prediction before the size experiment: increasing the graph from 1,200 to 20,000 nodes should increase time per iteration because there are more edges and nodes to visit. Iteration count need not increase in proportion: it depends on mixing, beta and tolerance, and the generated graphs have similar structure.
