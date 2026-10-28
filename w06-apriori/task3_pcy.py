@@ -19,6 +19,7 @@ Correctness first: you must find exactly the same frequent pairs. Finding fewer
 is not an optimisation.
 """
 from collections import Counter
+from array import array
 from itertools import combinations
 
 
@@ -75,8 +76,36 @@ class YourAlgorithm:
         observation.md asks about it
     """
 
-    def __init__(self, support):
-        raise NotImplementedError("write your algorithm")
+    def __init__(self, support, buckets=1_000_003):
+        if support < 1 or buckets < 1:
+            raise ValueError("support and buckets must be positive")
+        self.support = support
+        self.buckets = buckets
+        self.peak_counters = 0
 
     def run(self, baskets):
-        raise NotImplementedError
+        self.peak_counters = 0
+        singles = Counter()
+        # Fixed-size integer storage, not a million Python integer objects.
+        buckets = array('Q', [0]) * self.buckets
+        for basket in baskets:
+            singles.update(basket)
+            for pair in combinations(sorted(basket), 2):
+                index = hash(pair) % self.buckets
+                buckets[index] += 1
+        frequent = {item for item, count in singles.items() if count >= self.support}
+        bitmap = bytearray((self.buckets + 7) // 8)
+        for index, count in enumerate(buckets):
+            if count >= self.support:
+                bitmap[index >> 3] |= 1 << (index & 7)
+        del buckets  # Release bucket integers before allocating pair counters.
+        counts = Counter()
+        for basket in baskets:
+            for pair in combinations(sorted(basket & frequent), 2):
+                index = hash(pair) % self.buckets
+                if bitmap[index >> 3] & (1 << (index & 7)):
+                    counts[pair] += 1
+        self.peak_counters = len(counts)
+        # Reuse integer count objects in the result; no second count table.
+        return {frozenset(pair): count for pair, count in counts.items()
+                if count >= self.support}

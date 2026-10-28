@@ -1,0 +1,39 @@
+{
+  "measurements": [
+    {
+      "buckets": null,
+      "peak_counters": 820259,
+      "peak_bytes": 102288332,
+      "seconds": 4.664516999999705,
+      "exact_counts_match": true
+    },
+    {
+      "buckets": 1000003,
+      "peak_counters": 23356,
+      "peak_bytes": 8341434,
+      "seconds": 19.879410500000176,
+      "exact_counts_match": true
+    },
+    {
+      "buckets": 10007,
+      "peak_counters": 820259,
+      "peak_bytes": 102289432,
+      "seconds": 25.03554720000011,
+      "exact_counts_match": true
+    }
+  ],
+  "frequent_singletons": 1849,
+  "candidate_upper_bound": 1708476,
+  "best_rule": [
+    1468,
+    0,
+    0.8387096774193549,
+    1.2824306994179737
+  ],
+  "reverse_rule": [
+    0,
+    1468,
+    0.003975535168195718,
+    1.2824306994179737
+  ]
+}
